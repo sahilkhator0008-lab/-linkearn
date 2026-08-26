@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Continue — LinkEarn</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main class="container center">
+  <section class="card">
+    <div class="adbox">
+      <small>ADVERTISEMENT</small>
+      <p>Approved ad placement goes here.</p>
+    </div>
+
+    <h1>Your link is ready</h1>
+    <p>Please wait <strong id="count">5</strong> seconds.</p>
+    <div class="progress"><div id="bar"></div></div>
+    <button id="continue" class="hidden">Continue to destination</button>
+    <p class="note">Do not click advertisements to continue. Use the Continue button.</p>
+  </section>
+</main>
+
+<script>
+const code = location.pathname.split("/").pop();
+let destination = null;
+
+fetch("/api/redirect/" + encodeURIComponent(code))
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) throw new Error(data.error);
+    destination = data.destination;
+  })
+  .catch(() => {
+    document.querySelector("h1").textContent = "Link unavailable";
+  });
+
+let seconds = 5;
+const count = document.getElementById("count");
+const bar = document.getElementById("bar");
+const button = document.getElementById("continue");
+
+const timer = setInterval(() => {
+  seconds--;
+  count.textContent = seconds;
+  bar.style.width = ((5 - seconds) / 5 * 100) + "%";
+
+  if (seconds <= 0) {
+    clearInterval(timer);
+    button.classList.remove("hidden");
+  }
+}, 1000);
+
+button.onclick = () => {
+  if (destination) location.href = destination;
+};
+</script>
+</body>
+</html>
